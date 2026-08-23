@@ -9,15 +9,14 @@ Rectangle {
   property bool hovered: mouseArea.containsMouse
 
   signal clicked()
-  signal hoverChanged(bool hovered)
 
-  implicitWidth: text.width + 2
-  implicitHeight: text.height + 0.5
+  implicitWidth: label.width + 2
+  implicitHeight: label.height + 0.5
 
   color: backgroundColor
 
   Text {
-    id: text
+    id: label
     anchors.centerIn: parent
 
     text: root.text
@@ -30,12 +29,6 @@ Rectangle {
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
 
-    onEntered: root.hovered = true
-    onExited: root.hovered = false
-    onHoveredChanged: hoverChanged(hovered)
-
-    onClicked: {
-      root.clicked();
-    }
+    onClicked: root.clicked()
   }
 }
