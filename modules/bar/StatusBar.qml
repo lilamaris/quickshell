@@ -1,9 +1,6 @@
 import Quickshell
 import QtQuick
-import QtQuick.Layouts
-import QtQuick.Controls
 
-import qs.services.system.network
 import qs.modules.bar.components
 
 Variants {
@@ -25,17 +22,6 @@ Variants {
 
     color: "#111827"
 
-    FlexboxLayout {
-      id: layout
-      anchors.fill: parent
-
-      direction: FlexboxLayout.Row
-      alignItems: FlexboxLayout.AlignCenter
-      justifyContent: FlexboxLayout.JustifyCenter
-
-      NetworkIndicator {}
-
-      VolumeIndicator {}
-    }
+    Navigation {}
   }
 }
