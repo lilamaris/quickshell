@@ -13,7 +13,6 @@ QtObject {
   property bool inputMuted: false
   property string error: ""
 
-  function refresh() {}
   function setDefaultOutput(id) {}
   function setDefaultInput(id) {}
   function setOutputVolume(volume) {}

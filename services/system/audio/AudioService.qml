@@ -1,8 +1,8 @@
 pragma Singleton
 
 import Quickshell
-import qs.services.system.audio.wpctl
+import qs.services.system.audio.pipewire
 
 Singleton {
-  readonly property WpctlAudio backend: WpctlAudio {}
+  readonly property PipewireAudio backend: PipewireAudio {}
 }

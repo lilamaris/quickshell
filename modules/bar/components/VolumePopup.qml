@@ -6,8 +6,6 @@ Item {
   id: root
 
   readonly property var audio: AudioService.backend
-  property real pendingOutputVolume: 0
-  property real pendingInputVolume: 0
 
   implicitWidth: 320
   implicitHeight: 480
@@ -18,22 +16,12 @@ Item {
     padding: 12
     spacing: 8
 
-    Row {
+    Text {
       width: 296
-      spacing: 8
-
-      Text {
-        width: 240
-        text: "Audio · " + root.audio.backendName
-        color: "#cdd6f4"
-        font.bold: true
-        elide: Text.ElideRight
-      }
-
-      Button {
-        text: "↻"
-        onClicked: root.audio.refresh()
-      }
+      text: "Audio · " + root.audio.backendName
+      color: "#cdd6f4"
+      font.bold: true
+      elide: Text.ElideRight
     }
 
     Text {
@@ -78,18 +66,7 @@ Item {
         to: 100
         value: 0
         enabled: root.audio.available && root.audio.defaultOutputId !== ""
-        onMoved: {
-          root.pendingOutputVolume = value
-          outputDebounce.restart()
-        }
-        onPressedChanged: {
-          if (pressed) {
-            root.pendingOutputVolume = value
-          } else {
-            outputDebounce.stop()
-            root.audio.setOutputVolume(root.pendingOutputVolume)
-          }
-        }
+        onMoved: root.audio.setOutputVolume(value)
       }
       Text {
         anchors.verticalCenter: parent.verticalCenter
@@ -133,18 +110,7 @@ Item {
         to: 100
         value: 0
         enabled: root.audio.available && root.audio.defaultInputId !== ""
-        onMoved: {
-          root.pendingInputVolume = value
-          inputDebounce.restart()
-        }
-        onPressedChanged: {
-          if (pressed) {
-            root.pendingInputVolume = value
-          } else {
-            inputDebounce.stop()
-            root.audio.setInputVolume(root.pendingInputVolume)
-          }
-        }
+        onMoved: root.audio.setInputVolume(value)
       }
       Text {
         anchors.verticalCenter: parent.verticalCenter
@@ -153,18 +119,6 @@ Item {
         color: "white"
       }
     }
-  }
-
-  Timer {
-    id: outputDebounce
-    interval: 120
-    onTriggered: root.audio.setOutputVolume(root.pendingOutputVolume)
-  }
-
-  Timer {
-    id: inputDebounce
-    interval: 120
-    onTriggered: root.audio.setInputVolume(root.pendingInputVolume)
   }
 
   Binding {
