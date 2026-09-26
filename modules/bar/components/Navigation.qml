@@ -17,7 +17,26 @@ Item {
   property bool hasPopupPosition: false
   property bool animatePopupPosition: false
   property real popupWidth: 0
+  property real popupHeight: 0
   property real popupX: 0
+
+  Behavior on popupWidth {
+    enabled: root.animatePopupPosition
+
+    NumberAnimation {
+      duration: 180
+      easing.type: Easing.OutCubic
+    }
+  }
+
+  Behavior on popupHeight {
+    enabled: root.animatePopupPosition
+
+    NumberAnimation {
+      duration: 180
+      easing.type: Easing.OutCubic
+    }
+  }
 
   Behavior on popupX {
     enabled: root.animatePopupPosition
@@ -51,11 +70,12 @@ Item {
     if (!root.activeAnchor || !contentLoader.item) return
 
     const width = contentLoader.item.implicitWidth
-    const anchorRight = root.activeAnchor.mapToItem(root, root.activeAnchor.width, 0).x
-    const targetX = anchorRight - width
+    const anchorCenter = root.activeAnchor.mapToItem(root, root.activeAnchor.width / 2, 0).x
+    const targetX = anchorCenter - width / 2
 
     root.animatePopupPosition = root.hasPopupPosition
     root.popupWidth = width
+    root.popupHeight = contentLoader.item.implicitHeight
     root.popupX = targetX
     root.hasPopupPosition = true
   }
@@ -69,6 +89,7 @@ Item {
         root.hasPopupPosition = false
         root.animatePopupPosition = false
         root.popupWidth = 0
+        root.popupHeight = 0
       }
     }
   }
@@ -184,35 +205,42 @@ Item {
 
     color: "transparent"
 
-    implicitWidth: root.popupWidth
-    implicitHeight: contentLoader.height + 6
+    // Keep the window surface stable while the visible box moves and resizes.
+    implicitWidth: Math.min(400, root.width)
+    implicitHeight: 486
+    mask: Region { item: popupBox }
 
     anchor {
       item: root
-      rect.x: root.popupX
+      rect.x: (root.width - popupWindow.implicitWidth) / 2
       rect.y: root.height
     }
 
     Item {
       anchors.fill: parent
 
-      HoverHandler {
-        onHoveredChanged: {
-          if (hovered)
-            root.keepContentOpen()
-          else
-            root.clearContent(root.activeAnchor)
-        }
-      }
-
       Rectangle {
+        id: popupBox
+
+        x: root.popupX - (root.width - popupWindow.implicitWidth) / 2
         y: 6
-        width: parent.width
-        height: parent.height - y
+        width: root.popupWidth
+        height: root.popupHeight
 
         radius: 10
         color: "#181825"
+        clip: true
         opacity: root.popupOpen ? 1 : 0
+
+        HoverHandler {
+          onHoveredChanged: {
+            if (hovered)
+              root.keepContentOpen()
+            else
+              root.clearContent(root.activeAnchor)
+          }
+        }
+
         transform: Translate {
           y: root.popupOpen ? 0 : -4
 
@@ -235,6 +263,8 @@ Item {
           id: contentLoader
           sourceComponent: root.activeContent
           onLoaded: root.positionPopup()
+          onImplicitWidthChanged: root.positionPopup()
+          onImplicitHeightChanged: root.positionPopup()
         }
       }
     }
