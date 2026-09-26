@@ -20,6 +20,7 @@ Item {
   property real popupWidth: 0
   property real popupHeight: 0
   property real popupX: 0
+  property int closeRevision: 0
 
   function iconUrl(name) {
     return Qt.resolvedUrl("../../../assets/icons/" + name + ".svg")
@@ -53,22 +54,37 @@ Item {
   }
 
   function setContent(anchor, content) {
-    closeTimer.stop()
+    ++root.closeRevision
     root.activeAnchor = anchor
     root.activeContent = content
     root.popupOpen = true
   }
 
   function clearContent(anchor) {
-    if (root.activeAnchor !== anchor) return
-    root.popupOpen = false
-    closeTimer.restart()
+    if (root.activeAnchor !== anchor || !root.popupOpen) return
+    const revision = ++root.closeRevision
+    Qt.callLater(() => {
+      if (revision !== root.closeRevision || root.activeAnchor !== anchor || !root.popupOpen)
+        return
+      if (anchor.indicatorHovered || popupHover.hovered) return
+      root.popupOpen = false
+    })
   }
 
   function keepContentOpen() {
     if (root.activeContent === null) return
-    closeTimer.stop()
+    ++root.closeRevision
     root.popupOpen = true
+  }
+
+  function finishClosing() {
+    if (root.popupOpen) return
+    root.activeContent = null
+    root.activeAnchor = null
+    root.hasPopupPosition = false
+    root.animatePopupPosition = false
+    root.popupWidth = 0
+    root.popupHeight = 0
   }
 
   function positionPopup() {
@@ -83,20 +99,6 @@ Item {
     root.popupHeight = contentLoader.item.implicitHeight
     root.popupX = targetX
     root.hasPopupPosition = true
-  }
-
-  Timer {
-    id: closeTimer
-    interval: 160
-    onTriggered: {
-      if (!root.popupOpen) {
-        root.activeContent = null
-        root.hasPopupPosition = false
-        root.animatePopupPosition = false
-        root.popupWidth = 0
-        root.popupHeight = 0
-      }
-    }
   }
 
   FlexboxLayout {
@@ -213,7 +215,12 @@ Item {
     // Keep the window surface stable while the visible box moves and resizes.
     implicitWidth: Math.min(400, root.width)
     implicitHeight: 486
-    mask: Region { item: popupBox }
+    mask: Region {
+      x: popupHitArea.x
+      y: popupHitArea.y
+      width: root.popupOpen ? popupHitArea.width : 0
+      height: root.popupOpen ? popupHitArea.height : 0
+    }
 
     anchor {
       item: root
@@ -224,20 +231,16 @@ Item {
     Item {
       anchors.fill: parent
 
-      Rectangle {
-        id: popupBox
-
+      Item {
+        id: popupHitArea
         x: root.popupX - (root.width - popupWindow.implicitWidth) / 2
-        y: 6
+        y: 0
         width: root.popupWidth
-        height: root.popupHeight
-
-        radius: Theme.popupRadius
-        color: Theme.popupBackground
-        clip: true
-        opacity: root.popupOpen ? 1 : 0
+        height: root.popupHeight + 6
 
         HoverHandler {
+          id: popupHover
+          enabled: root.popupOpen
           onHoveredChanged: {
             if (hovered)
               root.keepContentOpen()
@@ -246,30 +249,43 @@ Item {
           }
         }
 
-        transform: Translate {
-          y: root.popupOpen ? 0 : -4
+        Rectangle {
+          id: popupBox
+          y: 6
+          width: parent.width
+          height: parent.height - y
 
-          Behavior on y {
+          radius: Theme.popupRadius
+          color: Theme.popupBackground
+          clip: true
+          opacity: root.popupOpen ? 1 : 0
+
+          transform: Translate {
+            y: root.popupOpen ? 0 : -4
+
+            Behavior on y {
+              NumberAnimation {
+                duration: Theme.motionMedium
+                easing.type: Easing.OutCubic
+                onStopped: root.finishClosing()
+              }
+            }
+          }
+
+          Behavior on opacity {
             NumberAnimation {
-              duration: Theme.motionMedium
+              duration: Theme.motionFast
               easing.type: Easing.OutCubic
             }
           }
-        }
 
-        Behavior on opacity {
-          NumberAnimation {
-            duration: Theme.motionFast
-            easing.type: Easing.OutCubic
+          Loader {
+            id: contentLoader
+            sourceComponent: root.activeContent
+            onLoaded: root.positionPopup()
+            onImplicitWidthChanged: root.positionPopup()
+            onImplicitHeightChanged: root.positionPopup()
           }
-        }
-
-        Loader {
-          id: contentLoader
-          sourceComponent: root.activeContent
-          onLoaded: root.positionPopup()
-          onImplicitWidthChanged: root.positionPopup()
-          onImplicitHeightChanged: root.positionPopup()
         }
       }
     }
