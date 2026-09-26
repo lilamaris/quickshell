@@ -23,5 +23,13 @@ Variants {
     color: "#111827"
 
     Navigation {}
+
+    SystemTime {
+      anchors {
+        right: parent.right
+        rightMargin: 8
+        verticalCenter: parent.verticalCenter
+      }
+    }
   }
 }
