@@ -21,6 +21,10 @@ Item {
   property real popupHeight: 0
   property real popupX: 0
 
+  function iconUrl(name) {
+    return Qt.resolvedUrl("../../../assets/icons/" + name + ".svg")
+  }
+
   Behavior on popupWidth {
     enabled: root.animatePopupPosition
 
@@ -107,7 +111,7 @@ Item {
 
       indicator: Component {
         IconButton {
-          iconSource: Quickshell.iconPath(NetworkService.wifi.connected
+          iconSource: root.iconUrl(NetworkService.wifi.connected
             ? "network-wireless"
             : "network-wireless-offline")
           iconSize: Theme.statusIconSize
@@ -136,7 +140,7 @@ Item {
 
       indicator: Component {
         IconButton {
-          iconSource: Quickshell.iconPath(!BluetoothService.backend.powered
+          iconSource: root.iconUrl(!BluetoothService.backend.powered
             ? "bluetooth-disabled"
             : BluetoothService.backend.connectedDeviceCount > 0
               ? "bluetooth-active" : "bluetooth")
@@ -169,7 +173,7 @@ Item {
 
       indicator: Component {
         IconButton {
-          iconSource: Quickshell.iconPath(AudioService.backend.outputMuted
+          iconSource: root.iconUrl(AudioService.backend.outputMuted
             || AudioService.backend.outputVolume === 0
               ? "audio-volume-muted"
               : AudioService.backend.outputVolume < 34
