@@ -1,12 +1,13 @@
 import QtQuick
+import qs.components.theme
 
 Rectangle {
   id: root
 
   property url iconSource
   property real iconSize: 16
-  property real padding: 4
-  property color backgroundColor: "#45475a"
+  property real padding: Theme.spacingSm
+  property color backgroundColor: Theme.buttonBackground
   property bool hovered: mouseArea.containsMouse
   property string accessibleName: ""
 
@@ -16,9 +17,14 @@ Rectangle {
   implicitHeight: iconSize + padding * 2
 
   color: backgroundColor
+  radius: Theme.spacingMd
   opacity: enabled ? 1 : 0.5
   Accessible.name: accessibleName
   Accessible.role: Accessible.Button
+
+  Behavior on color {
+    ColorAnimation { duration: Theme.motionFast }
+  }
 
   Image {
     anchors.centerIn: parent

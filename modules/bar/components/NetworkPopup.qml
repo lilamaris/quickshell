@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import qs.components.theme
 import qs.services.system.network
 
 Item {
@@ -12,11 +13,11 @@ Item {
     id: content
 
     width: 280
-    padding: 12
-    spacing: 8
+    padding: Theme.spacingLg
+    spacing: Theme.spacingMd
 
     Row {
-      spacing: 8
+      spacing: Theme.spacingMd
 
       Button {
         text: NetworkService.wifi.isForceRefreshing ? "Scanning…" : "Rescan"
@@ -29,7 +30,7 @@ Item {
         text: NetworkService.wifi.connected
           ? NetworkService.wifi.connection + "  " + NetworkService.wifi.signal + "%"
           : "Not connected"
-        color: "white"
+        color: Theme.textPrimary
         elide: Text.ElideRight
         width: 170
       }
@@ -40,8 +41,8 @@ Item {
       width: 256
       wrapMode: Text.Wrap
       text: NetworkService.wifi.connectionError
-      color: "#f38ba8"
-      font.pixelSize: 11
+      color: Theme.textError
+      font.pixelSize: Theme.fontSizeSmall
     }
 
     ListView {
@@ -49,7 +50,7 @@ Item {
       width: 256
       height: Math.min(count * 36 + Math.max(0, count - 1) * spacing, 240)
       clip: true
-      spacing: 4
+      spacing: Theme.spacingSm
       model: NetworkService.wifi.availableNetworks
 
       delegate: Button {
@@ -75,7 +76,7 @@ Item {
       visible: content.selectedNetwork && content.selectedNetwork.secured
         && !content.selectedNetwork.active
       text: content.selectedNetwork ? "Password for " + content.selectedNetwork.ssid : ""
-      color: "#cdd6f4"
+      color: Theme.textHeading
     }
 
     TextField {

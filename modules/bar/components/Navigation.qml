@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.components.common
+import qs.components.theme
 import qs.services.system.audio
 import qs.services.system.bluetooth
 import qs.services.system.network
@@ -24,7 +25,7 @@ Item {
     enabled: root.animatePopupPosition
 
     NumberAnimation {
-      duration: 180
+      duration: Theme.motionNormal
       easing.type: Easing.OutCubic
     }
   }
@@ -33,7 +34,7 @@ Item {
     enabled: root.animatePopupPosition
 
     NumberAnimation {
-      duration: 180
+      duration: Theme.motionNormal
       easing.type: Easing.OutCubic
     }
   }
@@ -42,7 +43,7 @@ Item {
     enabled: root.animatePopupPosition
 
     NumberAnimation {
-      duration: 180
+      duration: Theme.motionNormal
       easing.type: Easing.OutCubic
     }
   }
@@ -109,9 +110,9 @@ Item {
           iconSource: Quickshell.iconPath(NetworkService.wifi.connected
             ? "network-wireless"
             : "network-wireless-offline")
-          iconSize: 18
-          padding: 5
-          backgroundColor: "#00FF00"
+          iconSize: Theme.statusIconSize
+          padding: Theme.statusIconPadding
+          backgroundColor: hovered ? Theme.indicatorHoverBackground : Theme.indicatorBackground
           accessibleName: NetworkService.wifi.connected
             ? "Wi-Fi: " + NetworkService.wifi.connection
             : "Wi-Fi disconnected"
@@ -139,9 +140,9 @@ Item {
             ? "bluetooth-disabled"
             : BluetoothService.backend.connectedDeviceCount > 0
               ? "bluetooth-active" : "bluetooth")
-          iconSize: 18
-          padding: 5
-          backgroundColor: "#00FF00"
+          iconSize: Theme.statusIconSize
+          padding: Theme.statusIconPadding
+          backgroundColor: hovered ? Theme.indicatorHoverBackground : Theme.indicatorBackground
           accessibleName: !BluetoothService.backend.available
             ? "Bluetooth unavailable"
             : !BluetoothService.backend.powered
@@ -176,9 +177,9 @@ Item {
                 : AudioService.backend.outputVolume < 67
                   ? "audio-volume-medium"
                   : "audio-volume-high")
-          iconSize: 18
-          padding: 5
-          backgroundColor: "#00FF00"
+          iconSize: Theme.statusIconSize
+          padding: Theme.statusIconPadding
+          backgroundColor: hovered ? Theme.indicatorHoverBackground : Theme.indicatorBackground
           accessibleName: AudioService.backend.outputMuted
             ? "Audio muted"
             : "Volume " + Math.round(AudioService.backend.outputVolume) + "%"
@@ -227,8 +228,8 @@ Item {
         width: root.popupWidth
         height: root.popupHeight
 
-        radius: 10
-        color: "#181825"
+        radius: Theme.popupRadius
+        color: Theme.popupBackground
         clip: true
         opacity: root.popupOpen ? 1 : 0
 
@@ -246,7 +247,7 @@ Item {
 
           Behavior on y {
             NumberAnimation {
-              duration: 160
+              duration: Theme.motionMedium
               easing.type: Easing.OutCubic
             }
           }
@@ -254,7 +255,7 @@ Item {
 
         Behavior on opacity {
           NumberAnimation {
-            duration: 140
+            duration: Theme.motionFast
             easing.type: Easing.OutCubic
           }
         }

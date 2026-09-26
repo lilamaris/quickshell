@@ -1,5 +1,6 @@
 import Quickshell
 import QtQuick
+import qs.components.theme
 
 Rectangle {
   id: root
@@ -19,8 +20,8 @@ Rectangle {
 
     anchors.centerIn: parent
     text: Qt.formatDateTime(clock.date, "yyyy. MM. dd. ddd  HH:mm:ss")
-    color: "#f9fafb"
-    font.pixelSize: 12
+    color: Theme.barText
+    font.pixelSize: Theme.fontSizeNormal
     font.weight: Font.Medium
   }
 

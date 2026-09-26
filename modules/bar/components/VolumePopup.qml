@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import qs.components.theme
 import qs.services.system.audio
 
 Item {
@@ -13,13 +14,13 @@ Item {
   Column {
     id: content
     width: parent.width
-    padding: 12
-    spacing: 8
+    padding: Theme.spacingLg
+    spacing: Theme.spacingMd
 
     Text {
       width: 296
       text: "Audio · " + root.audio.backendName
-      color: "#cdd6f4"
+      color: Theme.textHeading
       font.bold: true
       elide: Text.ElideRight
     }
@@ -29,17 +30,17 @@ Item {
       width: 296
       wrapMode: Text.Wrap
       text: root.audio.error || "Audio backend is unavailable"
-      color: "#f38ba8"
+      color: Theme.textError
     }
 
-    Text { text: "Output devices"; color: "#a6adc8"; font.bold: true }
+    Text { text: "Output devices"; color: Theme.textMuted; font.bold: true }
 
     ListView {
       id: outputList
       width: 296
       height: 105
       clip: true
-      spacing: 4
+      spacing: Theme.spacingSm
       model: root.audio.outputDevices
 
       delegate: Button {
@@ -52,7 +53,7 @@ Item {
     }
 
     Row {
-      spacing: 8
+      spacing: Theme.spacingMd
       Button {
         width: 48
         text: root.audio.outputMuted ? "Muted" : "🔊"
@@ -72,18 +73,18 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: 40
         text: Math.round(outputSlider.value) + "%"
-        color: "white"
+        color: Theme.textPrimary
       }
     }
 
-    Text { text: "Input devices"; color: "#a6adc8"; font.bold: true }
+    Text { text: "Input devices"; color: Theme.textMuted; font.bold: true }
 
     ListView {
       id: inputList
       width: 296
       height: 105
       clip: true
-      spacing: 4
+      spacing: Theme.spacingSm
       model: root.audio.inputDevices
 
       delegate: Button {
@@ -96,7 +97,7 @@ Item {
     }
 
     Row {
-      spacing: 8
+      spacing: Theme.spacingMd
       Button {
         width: 48
         text: root.audio.inputMuted ? "Muted" : "🎙"
@@ -116,7 +117,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: 40
         text: Math.round(inputSlider.value) + "%"
-        color: "white"
+        color: Theme.textPrimary
       }
     }
   }

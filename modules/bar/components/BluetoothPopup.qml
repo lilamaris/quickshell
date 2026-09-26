@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import qs.components.theme
 import qs.services.system.bluetooth
 
 Item {
@@ -13,18 +14,18 @@ Item {
   Column {
     id: content
     width: 320
-    padding: 12
-    spacing: 8
+    padding: Theme.spacingLg
+    spacing: Theme.spacingMd
 
     Row {
       width: 296
-      spacing: 8
+      spacing: Theme.spacingMd
 
       Text {
         anchors.verticalCenter: parent.verticalCenter
         width: 190
         text: "Bluetooth"
-        color: "#cdd6f4"
+        color: Theme.textHeading
         font.bold: true
       }
 
@@ -37,7 +38,7 @@ Item {
     }
 
     Row {
-      spacing: 8
+      spacing: Theme.spacingMd
 
       Button {
         text: root.bluetooth.scanning ? "Scanning…" : "Scan for devices"
@@ -57,15 +58,15 @@ Item {
       width: 296
       wrapMode: Text.Wrap
       text: root.bluetooth.error || "Bluetooth backend is unavailable"
-      color: "#f38ba8"
-      font.pixelSize: 11
+      color: Theme.textError
+      font.pixelSize: Theme.fontSizeSmall
     }
 
     Text {
       visible: root.bluetooth.powered && root.bluetooth.devices.length === 0
       width: 296
       text: root.bluetooth.scanning ? "Looking for nearby devices…" : "No Bluetooth devices found"
-      color: "#a6adc8"
+      color: Theme.textMuted
     }
 
     ListView {
@@ -74,7 +75,7 @@ Item {
       width: 296
       height: Math.min(count * 48 + Math.max(0, count - 1) * spacing, 288)
       clip: true
-      spacing: 4
+      spacing: Theme.spacingSm
       model: root.bluetooth.devices
 
       delegate: Row {
@@ -86,12 +87,12 @@ Item {
         Column {
           anchors.verticalCenter: parent.verticalCenter
           width: 184
-          spacing: 2
+          spacing: Theme.spacingXs
 
           Text {
             width: parent.width
             text: modelData.name
-            color: "white"
+            color: Theme.textPrimary
             elide: Text.ElideRight
           }
 
@@ -99,8 +100,8 @@ Item {
             width: parent.width
             text: modelData.connected ? "Connected"
               : modelData.paired ? "Paired" : modelData.address
-            color: modelData.connected ? "#a6e3a1" : "#a6adc8"
-            font.pixelSize: 11
+            color: modelData.connected ? Theme.textSuccess : Theme.textMuted
+            font.pixelSize: Theme.fontSizeSmall
             elide: Text.ElideRight
           }
         }

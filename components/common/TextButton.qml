@@ -1,11 +1,12 @@
 import QtQuick
+import qs.components.theme
 
 Rectangle {
   id: root
 
   property string text: "undefined"
-  property color foregroundColor: "#FFFFFF"
-  property color backgroundColor: "#45475a"
+  property color foregroundColor: Theme.textPrimary
+  property color backgroundColor: Theme.buttonBackground
   property bool hovered: mouseArea.containsMouse
 
   signal clicked()

@@ -2,6 +2,7 @@ import Quickshell
 import QtQuick
 
 import qs.modules.bar.components
+import qs.components.theme
 
 Variants {
   model: Quickshell.screens
@@ -20,7 +21,7 @@ Variants {
     implicitHeight: 28
     implicitWidth: 52
 
-    color: "#111827"
+    color: Theme.barBackground
 
     Navigation {}
 
