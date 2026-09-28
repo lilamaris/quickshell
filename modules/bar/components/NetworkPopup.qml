@@ -1,102 +1,229 @@
 import QtQuick
 import QtQuick.Controls
+import qs.components.common
 import qs.components.theme
 import qs.services.system.network
 
 Item {
   id: root
 
-  implicitWidth: 280
+  property var selectedNetwork: null
+  readonly property bool passwordVisible: selectedNetwork !== null
+    && selectedNetwork.secured
+    && !(NetworkService.wifi.connected && NetworkService.wifi.connection === selectedNetwork.ssid)
+
+  onPasswordVisibleChanged: {
+    if (!passwordVisible && passwordField) passwordField.clear()
+  }
+
+  function connectSelectedNetwork() {
+    if (!root.selectedNetwork || !passwordField.text || NetworkService.wifi.isConnecting) return
+    NetworkService.wifi.connectNetwork(root.selectedNetwork.ssid, passwordField.text)
+  }
+
+  implicitWidth: 320
   implicitHeight: content.implicitHeight
 
   Column {
     id: content
-
-    width: 280
-    padding: Theme.spacingLg
-    spacing: Theme.spacingMd
+    width: root.implicitWidth
+    padding: 16
+    spacing: Theme.spacingLg
 
     Row {
+      width: 288
+      height: 32
       spacing: Theme.spacingMd
 
-      Button {
-        text: NetworkService.wifi.isForceRefreshing ? "Scanning…" : "Rescan"
+      Text {
+        width: parent.width - refreshButton.width - parent.spacing
+        anchors.verticalCenter: parent.verticalCenter
+        text: "Wi-Fi"
+        color: Theme.textHeading
+        font.pixelSize: 16
+        font.weight: Font.DemiBold
+      }
+
+      IconButton {
+        id: refreshButton
+        iconSource: Qt.resolvedUrl("../../../assets/icons/refresh.svg")
+        iconSize: 16
+        padding: 8
+        accessibleName: NetworkService.wifi.isForceRefreshing ? "Scanning networks" : "Rescan networks"
         enabled: !NetworkService.wifi.isForceRefreshing
         onClicked: NetworkService.wifi.refresh(true)
       }
+    }
 
-      Text {
+    Rectangle {
+      width: 288
+      height: 68
+      radius: Theme.popupRadius
+      color: Theme.cardBackground
+
+      Image {
+        id: statusIcon
+        anchors.left: parent.left
+        anchors.leftMargin: 16
         anchors.verticalCenter: parent.verticalCenter
-        text: NetworkService.wifi.connected
-          ? NetworkService.wifi.connection + "  " + NetworkService.wifi.signal + "%"
-          : "Not connected"
-        color: Theme.textPrimary
-        elide: Text.ElideRight
-        width: 170
+        width: 24
+        height: 24
+        source: Qt.resolvedUrl("../../../assets/icons/" + (NetworkService.wifi.connected
+          ? "network-wireless" : "network-wireless-offline") + ".svg")
+        sourceSize.width: width
+        sourceSize.height: height
       }
-    }
 
-    Text {
-      visible: NetworkService.wifi.connectionError !== ""
-      width: 256
-      wrapMode: Text.Wrap
-      text: NetworkService.wifi.connectionError
-      color: Theme.textError
-      font.pixelSize: Theme.fontSizeSmall
-    }
+      Column {
+        anchors.left: statusIcon.right
+        anchors.leftMargin: 14
+        anchors.right: parent.right
+        anchors.rightMargin: 16
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: Theme.spacingXs
 
-    ListView {
-      id: networkList
-      width: 256
-      height: Math.min(count * 36 + Math.max(0, count - 1) * spacing, 240)
-      clip: true
-      spacing: Theme.spacingSm
-      model: NetworkService.wifi.availableNetworks
+        Text {
+          width: parent.width
+          text: NetworkService.wifi.connected ? NetworkService.wifi.connection : "Not connected"
+          color: Theme.textPrimary
+          font.pixelSize: Theme.fontSizeNormal
+          font.weight: Font.DemiBold
+          elide: Text.ElideRight
+        }
 
-      delegate: Button {
-        required property var modelData
-        width: networkList.width
-        text: (modelData.active ? "✓ " : "") + modelData.ssid
-          + "  " + modelData.signal + "%" + (modelData.secured ? "  🔒" : "")
-        enabled: !NetworkService.wifi.isConnecting
-        onClicked: {
-          content.selectedNetwork = modelData
-          passwordField.text = ""
-          if (!modelData.secured || modelData.active)
-            NetworkService.wifi.connectNetwork(modelData.ssid, "")
-          else
-            passwordField.forceActiveFocus()
+        Text {
+          width: parent.width
+          text: NetworkService.wifi.connected
+            ? "Connected · " + NetworkService.wifi.signal + "% signal"
+            : "Choose a network to get online"
+          color: NetworkService.wifi.connected ? Theme.textSuccess : Theme.textMuted
+          font.pixelSize: Theme.fontSizeSmall
+          elide: Text.ElideRight
         }
       }
     }
 
-    property var selectedNetwork: null
+    Rectangle {
+      visible: NetworkService.wifi.connectionError !== ""
+      width: 288
+      implicitHeight: errorText.implicitHeight + 16
+      radius: Theme.spacingMd
+      color: Theme.accentBackground
+
+      Text {
+        id: errorText
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: Theme.spacingMd
+        anchors.verticalCenter: parent.verticalCenter
+        text: NetworkService.wifi.connectionError
+        color: Theme.textError
+        font.pixelSize: Theme.fontSizeSmall
+        wrapMode: Text.Wrap
+      }
+    }
+
+    Row {
+      width: 288
+      height: 16
+
+      Text {
+        width: parent.width - networkCount.width
+        text: "Available networks"
+        color: Theme.textMuted
+        font.pixelSize: Theme.fontSizeSmall
+        font.weight: Font.DemiBold
+      }
+
+      Text {
+        id: networkCount
+        text: String(networkList.count)
+        color: Theme.textMuted
+        font.pixelSize: Theme.fontSizeSmall
+      }
+    }
 
     Text {
-      visible: content.selectedNetwork && content.selectedNetwork.secured
-        && !content.selectedNetwork.active
-      text: content.selectedNetwork ? "Password for " + content.selectedNetwork.ssid : ""
-      color: Theme.textHeading
+      visible: networkList.count === 0
+      width: 288
+      text: NetworkService.wifi.isForceRefreshing
+        ? "Looking for nearby networks…" : "No networks found"
+      color: Theme.textMuted
+      font.pixelSize: Theme.fontSizeNormal
+    }
+
+    ListView {
+      id: networkList
+      visible: count > 0
+      width: 288
+      height: Math.min(count * 54 + Math.max(0, count - 1) * spacing,
+                       root.passwordVisible ? 130 : 200)
+      clip: true
+      spacing: Theme.spacingSm
+      model: NetworkService.wifi.availableNetworks
+
+      delegate: PopupListItem {
+        required property var modelData
+        width: networkList.width
+        iconSource: Qt.resolvedUrl("../../../assets/icons/network-wireless.svg")
+        title: modelData.ssid
+        subtitle: modelData.active ? "Connected"
+          : modelData.secured ? "Secured network" : "Open network"
+        detail: modelData.signal + "%"
+        selected: modelData.active || (root.passwordVisible
+          && root.selectedNetwork.ssid === modelData.ssid)
+        enabled: !NetworkService.wifi.isConnecting
+        onClicked: {
+          if (modelData.active) return
+          root.selectedNetwork = modelData
+          passwordField.text = ""
+          if (modelData.secured)
+            Qt.callLater(() => passwordField.forceActiveFocus())
+          else
+            NetworkService.wifi.connectNetwork(modelData.ssid, "")
+        }
+      }
+    }
+
+    Text {
+      visible: root.passwordVisible
+      width: 288
+      text: root.selectedNetwork ? "Password for " + root.selectedNetwork.ssid : ""
+      color: Theme.textPrimary
+      font.pixelSize: Theme.fontSizeSmall
+      elide: Text.ElideRight
     }
 
     TextField {
       id: passwordField
-      visible: content.selectedNetwork && content.selectedNetwork.secured
-        && !content.selectedNetwork.active
-      width: 256
-      placeholderText: "Wi-Fi password"
+      visible: root.passwordVisible
+      width: 288
+      height: 36
+      placeholderText: "Network password"
       echoMode: TextInput.Password
       enabled: !NetworkService.wifi.isConnecting
-      onAccepted: connectButton.clicked()
+      color: Theme.textPrimary
+      placeholderTextColor: Theme.textMuted
+      font.pixelSize: Theme.fontSizeNormal
+      leftPadding: Theme.spacingLg
+      rightPadding: Theme.spacingLg
+      onAccepted: root.connectSelectedNetwork()
+
+      background: Rectangle {
+        radius: Theme.spacingMd
+        color: Theme.buttonBackground
+        border.width: passwordField.activeFocus ? 1 : 0
+        border.color: Theme.accent
+      }
     }
 
-    Button {
-      id: connectButton
-      visible: passwordField.visible
-      width: 256
+    TextButton {
+      visible: root.passwordVisible
+      width: 288
+      emphasized: true
       text: NetworkService.wifi.isConnecting ? "Connecting…" : "Connect"
       enabled: passwordField.text.length > 0 && !NetworkService.wifi.isConnecting
-      onClicked: NetworkService.wifi.connectNetwork(content.selectedNetwork.ssid, passwordField.text)
+      onClicked: root.connectSelectedNetwork()
     }
   }
 }
