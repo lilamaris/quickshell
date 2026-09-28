@@ -9,7 +9,7 @@ Item {
 
   property var selectedNetwork: null
   readonly property bool passwordVisible: selectedNetwork !== null
-    && selectedNetwork.secured
+    && NetworkService.wifi.passwordRequiredFor === selectedNetwork.ssid
     && !(NetworkService.wifi.connected && NetworkService.wifi.connection === selectedNetwork.ssid)
 
   onPasswordVisibleChanged: {
@@ -50,7 +50,7 @@ Item {
         iconSize: 16
         padding: 8
         accessibleName: NetworkService.wifi.isForceRefreshing ? "Scanning networks" : "Rescan networks"
-        enabled: !NetworkService.wifi.isForceRefreshing
+        enabled: NetworkService.wifi.enabled && !NetworkService.wifi.isForceRefreshing
         onClicked: NetworkService.wifi.refresh(true)
       }
     }
@@ -84,7 +84,9 @@ Item {
 
         Text {
           width: parent.width
-          text: NetworkService.wifi.connected ? NetworkService.wifi.connection : "Not connected"
+          text: NetworkService.wifi.connected ? NetworkService.wifi.connection
+            : !NetworkService.wifi.available ? "Wi-Fi unavailable"
+            : !NetworkService.wifi.enabled ? "Wi-Fi off" : "Not connected"
           color: Theme.textPrimary
           font.pixelSize: Theme.fontSizeNormal
           font.weight: Font.DemiBold
@@ -95,7 +97,8 @@ Item {
           width: parent.width
           text: NetworkService.wifi.connected
             ? "Connected · " + NetworkService.wifi.signal + "% signal"
-            : "Choose a network to get online"
+            : NetworkService.wifi.enabled ? "Choose a network to get online"
+            : "Enable Wi-Fi in system settings"
           color: NetworkService.wifi.connected ? Theme.textSuccess : Theme.textMuted
           font.pixelSize: Theme.fontSizeSmall
           elide: Text.ElideRight
@@ -147,7 +150,8 @@ Item {
       visible: networkList.count === 0
       width: 288
       text: NetworkService.wifi.isForceRefreshing
-        ? "Looking for nearby networks…" : "No networks found"
+        ? "Looking for nearby networks…"
+        : NetworkService.wifi.enabled ? "No networks found" : "No networks available"
       color: Theme.textMuted
       font.pixelSize: Theme.fontSizeNormal
     }
@@ -168,19 +172,17 @@ Item {
         iconSource: Qt.resolvedUrl("../../../assets/icons/network-wireless.svg")
         title: modelData.ssid
         subtitle: modelData.active ? "Connected"
+          : modelData.known ? "Saved network"
           : modelData.secured ? "Secured network" : "Open network"
         detail: modelData.signal + "%"
         selected: modelData.active || (root.passwordVisible
           && root.selectedNetwork.ssid === modelData.ssid)
-        enabled: !NetworkService.wifi.isConnecting
+        enabled: NetworkService.wifi.enabled && !NetworkService.wifi.isConnecting
         onClicked: {
           if (modelData.active) return
           root.selectedNetwork = modelData
           passwordField.text = ""
-          if (modelData.secured)
-            Qt.callLater(() => passwordField.forceActiveFocus())
-          else
-            NetworkService.wifi.connectNetwork(modelData.ssid, "")
+          NetworkService.wifi.connectNetwork(modelData.ssid, "")
         }
       }
     }
