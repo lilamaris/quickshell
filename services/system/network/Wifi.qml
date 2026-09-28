@@ -9,6 +9,9 @@ QtObject {
   property bool isForceRefreshing: false
   property bool isConnecting: false
   property string connectionError: ""
+  property string passwordRequiredFor: ""
+  property bool available: false
+  property bool enabled: false
 
   function refresh() {}
   function connectNetwork(ssid, password) {}

@@ -1,5 +1,6 @@
 import QtQuick
 
 QtObject {
-  readonly property bool available: false
+  property bool available: false
+  property bool connected: false
 }
