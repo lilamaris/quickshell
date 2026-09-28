@@ -21,6 +21,7 @@ Item {
   property real popupHeight: 0
   property real popupX: 0
   property int closeRevision: 0
+  property bool changingPopupFocus: false
 
   function iconUrl(name) {
     return Qt.resolvedUrl("../../../assets/icons/" + name + ".svg")
@@ -66,7 +67,8 @@ Item {
     Qt.callLater(() => {
       if (revision !== root.closeRevision || root.activeAnchor !== anchor || !root.popupOpen)
         return
-      if (anchor.indicatorHovered || popupHover.hovered) return
+      if (root.changingPopupFocus || popupWindow.grabFocus
+          || anchor.indicatorHovered || popupHover.hovered) return
       root.popupOpen = false
     })
   }
@@ -79,12 +81,26 @@ Item {
 
   function finishClosing() {
     if (root.popupOpen) return
+    popupWindow.visible = false
+    popupWindow.grabFocus = false
     root.activeContent = null
     root.activeAnchor = null
     root.hasPopupPosition = false
     root.animatePopupPosition = false
     root.popupWidth = 0
     root.popupHeight = 0
+  }
+
+  function focusPopup() {
+    if (!root.popupOpen || popupWindow.grabFocus || root.changingPopupFocus) return
+    ++root.closeRevision
+    root.changingPopupFocus = true
+    popupWindow.visible = false
+    popupWindow.grabFocus = true
+    Qt.callLater(() => {
+      if (root.popupOpen && root.activeContent !== null) popupWindow.visible = true
+      root.changingPopupFocus = false
+    })
   }
 
   function positionPopup() {
@@ -99,6 +115,7 @@ Item {
     root.popupHeight = contentLoader.item.implicitHeight
     root.popupX = targetX
     root.hasPopupPosition = true
+    if (root.popupOpen && !root.changingPopupFocus) popupWindow.visible = true
   }
 
   FlexboxLayout {
@@ -133,7 +150,9 @@ Item {
       }
 
       content: Component {
-        NetworkPopup {}
+        NetworkPopup {
+          onKeyboardFocusRequested: root.focusPopup()
+        }
       }
     }
 
@@ -208,7 +227,14 @@ Item {
   PopupWindow {
     id: popupWindow
 
-    visible: root.activeContent !== null && root.popupWidth > 0
+    visible: false
+    grabFocus: false
+    onVisibleChanged: {
+      if (!visible && root.popupOpen && !root.changingPopupFocus) {
+        root.popupOpen = false
+        root.finishClosing()
+      }
+    }
 
     color: "transparent"
 

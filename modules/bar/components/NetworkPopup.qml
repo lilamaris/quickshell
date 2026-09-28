@@ -7,13 +7,20 @@ import qs.services.system.network
 Item {
   id: root
 
+  signal keyboardFocusRequested()
+
   property var selectedNetwork: null
   readonly property bool passwordVisible: selectedNetwork !== null
     && NetworkService.wifi.passwordRequiredFor === selectedNetwork.ssid
     && !(NetworkService.wifi.connected && NetworkService.wifi.connection === selectedNetwork.ssid)
 
   onPasswordVisibleChanged: {
-    if (!passwordVisible && passwordField) passwordField.clear()
+    if (!passwordField) return
+    if (passwordVisible) {
+      root.keyboardFocusRequested()
+      Qt.callLater(() => passwordField.forceActiveFocus())
+    }
+    else passwordField.clear()
   }
 
   function connectSelectedNetwork() {
