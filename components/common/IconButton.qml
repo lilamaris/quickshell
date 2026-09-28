@@ -8,7 +8,10 @@ Rectangle {
   property real iconSize: 16
   property real padding: Theme.spacingSm
   property color backgroundColor: Theme.buttonBackground
+  property color hoverBackgroundColor: Theme.buttonHoverBackground
+  property color pressedBackgroundColor: Theme.buttonPressedBackground
   property bool hovered: mouseArea.containsMouse
+  property bool pressed: mouseArea.pressed
   property string accessibleName: ""
 
   signal clicked()
@@ -16,11 +19,18 @@ Rectangle {
   implicitWidth: iconSize + padding * 2
   implicitHeight: iconSize + padding * 2
 
-  color: backgroundColor
+  color: !enabled ? backgroundColor
+    : pressed ? pressedBackgroundColor
+    : hovered || activeFocus ? hoverBackgroundColor : backgroundColor
   radius: Theme.spacingMd
   opacity: enabled ? 1 : 0.5
+  activeFocusOnTab: true
   Accessible.name: accessibleName
   Accessible.role: Accessible.Button
+
+  Keys.onReturnPressed: root.clicked()
+  Keys.onEnterPressed: root.clicked()
+  Keys.onSpacePressed: root.clicked()
 
   Behavior on color {
     ColorAnimation { duration: Theme.motionFast }
