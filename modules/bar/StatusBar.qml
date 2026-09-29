@@ -23,6 +23,15 @@ Variants {
 
     color: Theme.barBackground
 
+    Workspaces {
+      targetScreen: modelData
+      anchors {
+        left: parent.left
+        leftMargin: 8
+        verticalCenter: parent.verticalCenter
+      }
+    }
+
     Navigation {}
 
     SystemTime {
