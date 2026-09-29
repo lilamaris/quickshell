@@ -8,6 +8,7 @@ Rectangle {
   property string title: ""
   property string subtitle: ""
   property string detail: ""
+  property bool detailIsAction: false
   property bool selected: false
   property bool hovered: mouseArea.containsMouse
   property bool pressed: mouseArea.pressed
@@ -76,11 +77,13 @@ Rectangle {
     anchors.right: parent.right
     anchors.rightMargin: Theme.spacingLg
     anchors.verticalCenter: parent.verticalCenter
-    width: 62
+    width: root.detailIsAction ? 72 : 62
     text: root.detail
-    color: Theme.textMuted
+    color: root.detailIsAction ? Theme.accent : Theme.textMuted
     font.pixelSize: Theme.fontSizeSmall
+    font.weight: root.detailIsAction ? Font.DemiBold : Font.Normal
     horizontalAlignment: Text.AlignRight
+    elide: Text.ElideRight
   }
 
   MouseArea {
