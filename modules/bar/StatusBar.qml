@@ -3,11 +3,13 @@ import QtQuick
 
 import qs.modules.bar.components
 import qs.components.theme
+import qs.services.system.notifications
 
 Variants {
   model: Quickshell.screens
 
   PanelWindow {
+    id: panel
     required property var modelData
     screen: modelData
 
@@ -40,6 +42,13 @@ Variants {
         rightMargin: 8
         verticalCenter: parent.verticalCenter
       }
+    }
+
+    NotificationToast {
+      anchorWindow: panel
+      visible: modelData === Quickshell.screens[0]
+        && NotificationService.toastVisible
+        && NotificationService.toastNotification !== null
     }
   }
 }

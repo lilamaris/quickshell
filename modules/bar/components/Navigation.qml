@@ -6,6 +6,7 @@ import qs.components.theme
 import qs.services.system.audio
 import qs.services.system.bluetooth
 import qs.services.system.network
+import qs.services.system.notifications
 
 Item {
   id: root
@@ -124,6 +125,49 @@ Item {
     direction: FlexboxLayout.Row
     alignItems: FlexboxLayout.AlignCenter
     justifyContent: FlexboxLayout.JustifyCenter
+
+    NavigationItem {
+      id: notifications
+
+      indicator: Component {
+        IconButton {
+          iconSource: root.iconUrl("notification")
+          iconSize: Theme.statusIconSize
+          padding: Theme.statusIconPadding
+          backgroundColor: hovered ? Theme.indicatorHoverBackground : Theme.indicatorBackground
+          accessibleName: "Notifications, " + NotificationService.unreadCount + " unread"
+
+          Rectangle {
+            visible: NotificationService.unreadCount > 0
+            anchors.right: parent.right
+            anchors.top: parent.top
+            width: 8
+            height: 8
+            radius: 4
+            color: Theme.accent
+          }
+
+          onHoveredChanged: {
+            if (hovered) {
+              NotificationService.markRead()
+              setContent(notifications, notifications.content)
+            } else {
+              clearContent(notifications)
+            }
+          }
+
+          onClicked: {
+            NotificationService.markRead()
+            setContent(notifications, notifications.content)
+            root.focusPopup()
+          }
+        }
+      }
+
+      content: Component {
+        NotificationCenter {}
+      }
+    }
 
     NavigationItem {
       id: network
