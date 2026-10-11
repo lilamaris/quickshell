@@ -59,7 +59,9 @@ Row {
       function activate() {
         if (root.hyprlandSession) {
           if (hyprlandWorkspace) hyprlandWorkspace.activate()
-          else Hyprland.dispatch("workspace " + modelData)
+          else Hyprland.dispatch(Hyprland.usingLua
+            ? "hl.dsp.focus({ workspace = " + modelData + " })"
+            : "workspace " + modelData)
         } else if (root.i3Session || modelData.canActivate) {
           modelData.activate()
         }
