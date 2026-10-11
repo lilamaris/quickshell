@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import qs.components.common
 import qs.components.theme
+import qs.services
 import qs.services.system.audio
 
 Item {
@@ -68,8 +69,8 @@ Item {
       enabled: root.audio.defaultOutputId !== ""
       channelName: "Output"
       deviceName: root.activeOutput ? root.activeOutput.name : ""
-      iconSource: Qt.resolvedUrl("../../../assets/icons/audio-volume-high.svg")
-      mutedIconSource: Qt.resolvedUrl("../../../assets/icons/audio-volume-muted.svg")
+      iconSource: AssetService.icon("audio-volume-high")
+      mutedIconSource: AssetService.icon("audio-volume-muted")
       volume: root.audio.outputVolume
       muted: root.audio.outputMuted
       onVolumeMoved: value => root.audio.setOutputVolume(value)
@@ -118,7 +119,7 @@ Item {
       delegate: PopupListItem {
         required property var modelData
         width: outputList.width
-        iconSource: Qt.resolvedUrl("../../../assets/icons/audio-volume-high.svg")
+        iconSource: AssetService.icon("audio-volume-high")
         title: modelData.name
         subtitle: modelData.active ? "Default output" : "Select as output"
         detail: modelData.active ? "Current" : ""
@@ -134,8 +135,8 @@ Item {
       enabled: root.audio.defaultInputId !== ""
       channelName: "Input"
       deviceName: root.activeInput ? root.activeInput.name : ""
-      iconSource: Qt.resolvedUrl("../../../assets/icons/audio-input.svg")
-      mutedIconSource: Qt.resolvedUrl("../../../assets/icons/audio-input-muted.svg")
+      iconSource: AssetService.icon("audio-input")
+      mutedIconSource: AssetService.icon("audio-input-muted")
       volume: root.audio.inputVolume
       muted: root.audio.inputMuted
       onVolumeMoved: value => root.audio.setInputVolume(value)
@@ -184,7 +185,7 @@ Item {
       delegate: PopupListItem {
         required property var modelData
         width: inputList.width
-        iconSource: Qt.resolvedUrl("../../../assets/icons/audio-input.svg")
+        iconSource: AssetService.icon("audio-input")
         title: modelData.name
         subtitle: modelData.active ? "Default input" : "Select as input"
         detail: modelData.active ? "Current" : ""

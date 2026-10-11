@@ -3,10 +3,15 @@ import QtQuick.Layouts
 import Quickshell
 import qs.components.common
 import qs.components.theme
+import qs.services
 import qs.services.system.audio
 import qs.services.system.bluetooth
 import qs.services.system.network
 import qs.services.system.notifications
+import qs.modules.bar.components.navigation.notification
+import qs.modules.bar.components.navigation.network
+import qs.modules.bar.components.navigation.volume
+import qs.modules.bar.components.navigation.bluetooth
 
 Item {
   id: root
@@ -23,10 +28,6 @@ Item {
   property real popupX: 0
   property int closeRevision: 0
   property bool changingPopupFocus: false
-
-  function iconUrl(name) {
-    return Qt.resolvedUrl("../../../assets/icons/" + name + ".svg")
-  }
 
   Behavior on popupWidth {
     enabled: root.animatePopupPosition
@@ -66,11 +67,11 @@ Item {
     if (root.activeAnchor !== anchor || !root.popupOpen) return
     const revision = ++root.closeRevision
     Qt.callLater(() => {
-      if (revision !== root.closeRevision || root.activeAnchor !== anchor || !root.popupOpen)
+        if (revision !== root.closeRevision || root.activeAnchor !== anchor || !root.popupOpen)
         return
-      if (root.changingPopupFocus || popupWindow.grabFocus
+        if (root.changingPopupFocus || popupWindow.grabFocus
           || anchor.indicatorHovered || popupHover.hovered) return
-      root.popupOpen = false
+        root.popupOpen = false
     })
   }
 
@@ -99,8 +100,8 @@ Item {
     popupWindow.visible = false
     popupWindow.grabFocus = true
     Qt.callLater(() => {
-      if (root.popupOpen && root.activeContent !== null) popupWindow.visible = true
-      root.changingPopupFocus = false
+        if (root.popupOpen && root.activeContent !== null) popupWindow.visible = true
+        root.changingPopupFocus = false
     })
   }
 
@@ -130,40 +131,11 @@ Item {
       id: notifications
 
       indicator: Component {
-        IconButton {
-          iconSource: root.iconUrl("notification")
-          iconSize: Theme.statusIconSize
-          padding: Theme.statusIconPadding
-          backgroundColor: hovered ? Theme.indicatorHoverBackground : Theme.indicatorBackground
-          accessibleName: "Notifications, " + NotificationService.unreadCount + " unread"
-
-          Rectangle {
-            visible: NotificationService.unreadCount > 0
-            anchors.right: parent.right
-            anchors.top: parent.top
-            width: 8
-            height: 8
-            radius: 4
-            color: Theme.accent
-          }
-
-          onHoveredChanged: {
-            if (hovered) {
-              NotificationService.markRead()
-              setContent(notifications, notifications.content)
-            } else {
-              clearContent(notifications)
-            }
-          }
-
-          onClicked: {
-            NotificationService.markRead()
-            setContent(notifications, notifications.content)
-            root.focusPopup()
-          }
+        NotificationIndicator {
+          navigation: root
+          navigationItem: notifications
         }
       }
-
       content: Component {
         NotificationCenter {}
       }
@@ -173,23 +145,9 @@ Item {
       id: network
 
       indicator: Component {
-        IconButton {
-          iconSource: root.iconUrl(NetworkService.wifi.connected
-            ? "network-wireless"
-            : "network-wireless-offline")
-          iconSize: Theme.statusIconSize
-          padding: Theme.statusIconPadding
-          backgroundColor: hovered ? Theme.indicatorHoverBackground : Theme.indicatorBackground
-          accessibleName: NetworkService.wifi.connected
-            ? "Wi-Fi: " + NetworkService.wifi.connection
-            : "Wi-Fi disconnected"
-
-          onHoveredChanged: {
-            if (hovered)
-              setContent(network, network.content)
-            else
-              clearContent(network)
-          }
+        NetworkPopupIndicator {
+          navigation: root
+          navigationItem: network
         }
       }
 
@@ -204,27 +162,9 @@ Item {
       id: bluetooth
 
       indicator: Component {
-        IconButton {
-          iconSource: root.iconUrl(!BluetoothService.backend.powered
-            ? "bluetooth-disabled"
-            : BluetoothService.backend.connectedDeviceCount > 0
-              ? "bluetooth-active" : "bluetooth")
-          iconSize: Theme.statusIconSize
-          padding: Theme.statusIconPadding
-          backgroundColor: hovered ? Theme.indicatorHoverBackground : Theme.indicatorBackground
-          accessibleName: !BluetoothService.backend.available
-            ? "Bluetooth unavailable"
-            : !BluetoothService.backend.powered
-              ? "Bluetooth off"
-              : BluetoothService.backend.connectedDeviceCount > 0
-                ? "Bluetooth connected" : "Bluetooth on"
-
-          onHoveredChanged: {
-            if (hovered)
-              setContent(bluetooth, bluetooth.content)
-            else
-              clearContent(bluetooth)
-          }
+        BluetoothPopupIndicator {
+          navigation: root
+          navigationItem: bluetooth
         }
       }
 
@@ -237,28 +177,9 @@ Item {
       id: volume
 
       indicator: Component {
-        IconButton {
-          iconSource: root.iconUrl(AudioService.backend.outputMuted
-            || AudioService.backend.outputVolume === 0
-              ? "audio-volume-muted"
-              : AudioService.backend.outputVolume < 34
-                ? "audio-volume-low"
-                : AudioService.backend.outputVolume < 67
-                  ? "audio-volume-medium"
-                  : "audio-volume-high")
-          iconSize: Theme.statusIconSize
-          padding: Theme.statusIconPadding
-          backgroundColor: hovered ? Theme.indicatorHoverBackground : Theme.indicatorBackground
-          accessibleName: AudioService.backend.outputMuted
-            ? "Audio muted"
-            : "Volume " + Math.round(AudioService.backend.outputVolume) + "%"
-
-          onHoveredChanged: {
-            if (hovered)
-              setContent(volume, volume.content)
-            else
-              clearContent(volume)
-          }
+        VolumePopupIndicator {
+          navigation: root
+          navigationItem: volume
         }
       }
 
@@ -313,9 +234,9 @@ Item {
           enabled: root.popupOpen
           onHoveredChanged: {
             if (hovered)
-              root.keepContentOpen()
+            root.keepContentOpen()
             else
-              root.clearContent(root.activeAnchor)
+            root.clearContent(root.activeAnchor)
           }
         }
 

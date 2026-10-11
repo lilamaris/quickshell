@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import qs.components.common
 import qs.components.theme
+import qs.services
 import qs.services.system.bluetooth
 
 Item {
@@ -34,7 +35,7 @@ Item {
 
       IconButton {
         id: refreshButton
-        iconSource: Qt.resolvedUrl("../../../assets/icons/refresh.svg")
+        iconSource: AssetService.icon("refresh")
         iconSize: 16
         padding: 8
         accessibleName: "Refresh Bluetooth devices"
@@ -91,9 +92,9 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: 24
         height: 24
-        source: Qt.resolvedUrl("../../../assets/icons/" + (!root.bluetooth.powered
+        source: AssetService.icon(!root.bluetooth.powered
           ? "bluetooth-disabled" : root.bluetooth.connectedDeviceCount > 0
-            ? "bluetooth-active" : "bluetooth") + ".svg")
+            ? "bluetooth-active" : "bluetooth")
         sourceSize.width: width
         sourceSize.height: height
       }
@@ -203,8 +204,8 @@ Item {
       delegate: PopupListItem {
         required property var modelData
         width: deviceList.width
-        iconSource: Qt.resolvedUrl("../../../assets/icons/" + (modelData.connected
-          ? "bluetooth-active" : "bluetooth") + ".svg")
+        iconSource: AssetService.icon(modelData.connected
+          ? "bluetooth-active" : "bluetooth")
         title: modelData.name
         subtitle: modelData.connected ? "Connected"
           : modelData.paired ? "Paired" : modelData.address

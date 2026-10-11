@@ -1,8 +1,8 @@
 import QtQuick
 
 Item {
-  property Component indicator
-  property Component content
+  required property Component indicator
+  required property Component content
   readonly property bool indicatorHovered: indicatorLoader.item
     ? indicatorLoader.item.hovered : false
 
