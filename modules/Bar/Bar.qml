@@ -1,7 +1,8 @@
 import Quickshell
 import QtQuick
 
-import qs.modules.bar.components
+import qs.modules.Bar.components
+import qs.modules.Bar.Style
 import qs.components.theme
 import qs.services.system.notifications
 
@@ -47,8 +48,8 @@ Variants {
     NotificationToast {
       anchorWindow: panel
       visible: modelData === Quickshell.screens[0]
-        && NotificationService.toastVisible
-        && NotificationService.toastNotification !== null
+      && NotificationService.toastVisible
+      && NotificationService.toastNotification !== null
     }
   }
 }

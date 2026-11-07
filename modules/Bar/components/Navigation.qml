@@ -8,10 +8,10 @@ import qs.services.system.audio
 import qs.services.system.bluetooth
 import qs.services.system.network
 import qs.services.system.notifications
-import qs.modules.bar.components.navigation.notification
-import qs.modules.bar.components.navigation.network
-import qs.modules.bar.components.navigation.volume
-import qs.modules.bar.components.navigation.bluetooth
+import qs.modules.Bar.components.navigation.notification
+import qs.modules.Bar.components.navigation.network
+import qs.modules.Bar.components.navigation.volume
+import qs.modules.Bar.components.navigation.bluetooth
 
 Item {
   id: root
